@@ -57,8 +57,8 @@ with col3:
 st.title('')
 
 col1,col2 = st.columns([1,1])
-
 col3,col4 = st.columns([1,1])
+col5,col6 = st.columns([1,1])
 
 with col1:
     st.markdown("<h2 style='text-align: center; color: black;'>Franchise Distribution</h2>", unsafe_allow_html=True)
@@ -145,5 +145,44 @@ with col4:
         fig1.update_traces(marker_color='#5aa17f')
         st.plotly_chart(fig1)   
 
+with col5:
+    st.markdown("<h2 style='text-align: center; color: black;'>Top 10 Provinces</h2>", unsafe_allow_html=True)
+    option_by = ["Total Revenue", "Franchise Average Monthly Revenue", "Growth Revenue"]
+    option_province = st.selectbox("By:   ", option_by)
+
+    if option_province == "Total Revenue":
+        bytotal = df1.groupby("Province").revenue.sum().reset_index().sort_values(by=['revenue'], ascending=False).head(10)
+        fig1 = px.bar(bytotal,y="Province",x='revenue',color="Province",color_discrete_sequence=px.colors.sequential.Darkmint,height=700,width=750, text_auto='.2s')
+        fig1.update_layout(xaxis_title='Total Revenue',yaxis_title=' ', showlegend = False)
+        st.plotly_chart(fig1)
+    elif option_province == "Franchise Average Monthly Revenue":
+        byaverage = df1.groupby("Province").revenue.mean().reset_index().sort_values(by=['revenue'], ascending=False).head(10)
+        fig1 = px.bar(byaverage,y="Province",x='revenue',color="Province",color_discrete_sequence=px.colors.sequential.Darkmint,height=700,width=750, text_auto='.2s')
+        fig1.update_layout(xaxis_title='Franchise Average Monthly Revenue',yaxis_title=' ', showlegend = False)
+        st.plotly_chart(fig1)
+    else:
+        jan_2021 = df2[df2.month==1].reset_index()
+        des_2021 = df2[df2.month==12].reset_index()
+        data_revenue_jan_des_2021 = jan_2021.merge(right = des_2021,left_on=["Province"], right_on=["Province"])[["Province", "revenue_x", "revenue_y"]].rename(columns={"revenue_x":"revenue_jan_2021", "revenue_y":"revenue_des_2021"})
+        data_revenue_jan_des_2021["revenue_growth_percent"] = (data_revenue_jan_des_2021["revenue_des_2021"] - data_revenue_jan_des_2021["revenue_jan_2021"])*100/data_revenue_jan_des_2021["revenue_jan_2021"]
+        top_10_province_by_revenue_growth_2021 = data_revenue_jan_des_2021.sort_values(by=["revenue_growth_percent"], ascending=False).head(10)
+        fig1 = px.bar(top_10_province_by_revenue_growth_2021,y="Province",x='revenue_growth_percent',color="Province",color_discrete_sequence=px.colors.sequential.Darkmint,height=700,width=750, text_auto='.2s')
+        fig1.update_layout(xaxis_title='Yearly Revenue Growth (%)',yaxis_title=' ', showlegend = False)
+        st.plotly_chart(fig1)
 
 
+with col6:
+    st.markdown("<h2 style='text-align: center; color: black;'>Top 10 Franchise</h2>", unsafe_allow_html=True)
+    option_by = ["Total Revenue", "Franchise Average Monthly Revenue"]
+    option_province = st.selectbox("By:    ", option_by)
+
+    if option_province == "Total Revenue":
+        bytotal = df1.groupby("id").revenue.sum().reset_index().sort_values(by=['revenue'], ascending=False).head(10)
+        fig1 = px.bar(bytotal,y="id",x='revenue',color="id",color_discrete_sequence=px.colors.sequential.Darkmint,height=700,width=750, text_auto='.2s')
+        fig1.update_layout(xaxis_title='Total Revenue',yaxis_title=' ', showlegend = False)
+        st.plotly_chart(fig1)
+    elif option_province == "Franchise Average Monthly Revenue":
+        byaverage = df1.groupby("id").revenue.mean().reset_index().sort_values(by=['revenue'], ascending=False).head(10)
+        fig1 = px.bar(byaverage,y="id",x='revenue',color="id",color_discrete_sequence=px.colors.sequential.Darkmint,height=700,width=750, text_auto='.2s')
+        fig1.update_layout(xaxis_title='Franchise Average Monthly Revenue',yaxis_title=' ', showlegend = False)
+        st.plotly_chart(fig1)
